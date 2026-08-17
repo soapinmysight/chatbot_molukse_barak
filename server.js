@@ -7,6 +7,7 @@ const app = express(); //create express application in a constante
 const port = Number(process.env.PORT);//read port from env
 
 app.use(express.json()); // so that Express can read JSON request bodies
+app.use(express.static("public")); // so that Express can serve files in the public folder (so that the browser can display the website)
 
 // test to check if the server works (can be removed later)
 app.get("/api/test", (req, res) => {
