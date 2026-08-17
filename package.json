@@ -1,0 +1,19 @@
+{
+  "name": "openai-langchain-chatbot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Een eenvoudige chatbot-API met Node.js, Express, LangChain en de OpenAI API.",
+  "type": "module",
+  "scripts": {
+    "start": "node --watch --env-file=.env server.js",
+    "start:once": "node --env-file=.env server.js"
+  },
+  "engines": {
+    "node": ">=20.6.0"
+  },
+  "dependencies": {
+    "@langchain/core": "^1.2.8",
+    "@langchain/openai": "^1.5.8",
+    "express": "^5.2.1"
+  }
+}
