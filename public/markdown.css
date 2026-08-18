@@ -1,0 +1,106 @@
+/* Normal paragraphs */
+.botmessage p {
+    margin: 0;
+}
+
+/* Markdown headings */
+.botmessage h1,
+.botmessage h2,
+.botmessage h3,
+.botmessage h4 {
+    margin: 4px 0 0;
+    color: #01273D;
+    font-family: "Inclusive Sans", system-ui, sans-serif;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.botmessage h1 {
+    font-size: 17px;
+}
+
+.botmessage h2 {
+    font-size: 15px;
+}
+
+.botmessage h3,
+.botmessage h4 {
+    font-size: 13px;
+}
+
+/* Markdown lists */
+.botmessage ul,
+.botmessage ol {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.botmessage li {
+    margin: 3px 0;
+}
+
+/* Bold and italic Markdown */
+.botmessage strong {
+    font-weight: 700;
+}
+
+.botmessage em {
+    font-style: italic;
+}
+
+/* Markdown links */
+.botmessage a {
+    color: #5f4646;
+    font-weight: 600;
+    text-decoration: underline;
+}
+
+/* Markdown quotes */
+.botmessage blockquote {
+    margin: 2px 0;
+    padding-left: 8px;
+    border-left: 3px solid #E0CCCC;
+    color: #5f4646;
+    font-style: italic;
+}
+
+/* Small inline code */
+.botmessage code {
+    padding: 1px 4px;
+    border-radius: 4px;
+    background: #E0CCCC;
+    font-family: monospace;
+    font-size: 11px;
+}
+
+/* Larger code blocks */
+.botmessage pre {
+    margin: 0;
+    padding: 8px;
+    overflow-x: auto;
+    border-radius: 6px;
+    background: #E0CCCC;
+    white-space: pre-wrap;
+}
+
+.botmessage pre code {
+    padding: 0;
+    background: transparent;
+}
+
+/* Token information */
+.botmessage .token_usage {
+    align-self: flex-end;
+    margin-top: 3px;
+    color: #5f4646;
+    font-size: 10px;
+    opacity: 0.7;
+}
+
+.botmessage ul,
+.botmessage ol,
+.botmessage li {
+    font-family: "Inclusive Sans", system-ui, sans-serif;
+    font-size: 12px;
+    color: #01273D;
+}

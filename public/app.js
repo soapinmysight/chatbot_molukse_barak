@@ -1,3 +1,5 @@
+import { micromark } from 'https://esm.sh/micromark@3?bundle'
+
 // wait until html is loaded
 document.addEventListener("DOMContentLoaded", function () {
 
@@ -74,12 +76,18 @@ document.addEventListener("DOMContentLoaded", function () {
         message.classList.remove("loading-bubble");
         message.removeAttribute("aria-label"); // remove the aria-label for screen readers as well
 
-        // create a paragraph to add the text inside
-        const paragraph = document.createElement("p");
-        paragraph.textContent = text; // add the value of the text parameter to the paragraph
+        // // create a paragraph to add the text inside
+        // const paragraph = document.createElement("p");
+        // paragraph.textContent = text; // add the value of the text parameter to the paragraph
 
-        // remove the loading dots and add the response
-        message.replaceChildren(paragraph);
+        // add the value of the text parameter to cost that is converted to have markdown with micromark
+        const markdownHtml = micromark(text);
+
+        // // remove the loading dots and add the response
+        //message.replaceChildren(paragraph);
+
+        // remove the loading dots and add the response (formatted to have markdwon)
+        message.innerHTML = markdownHtml;
 
         // only add tokens if they are recieved (if they are a number)
         if (typeof tokens === "number") {
