@@ -27,8 +27,10 @@ if (!message?.trim()) {
 }
 
   try {
+
     const response = await callAssistant(message.trim()); //await until function callAssistant from chat.js returns OpenAi's response
-    return res.json({ response }); //return answer in json
+    return res.json(response); //return answer in json
+
   } catch (error) {
     console.error("OpenAI-aanroep mislukt:", error);
     return res.status(500).json({

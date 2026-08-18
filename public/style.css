@@ -169,6 +169,14 @@ line-height: normal;
     word-break: break-word;
 }
 
+.token_usage {
+    display: block;
+    margin-top: 6px;
+    font-size: 10px;
+    opacity: 0.6;
+    text-align: right;
+}
+
 /* Loading animation */
 .loading-bubble {
     min-width: auto;
@@ -255,6 +263,12 @@ line-height: normal;
     gap: 10px;
     border-radius: 15px;
     background: #E0CCCC;
+}
+
+.send_btn.loading {
+    cursor: not-allowed;
+    opacity: 0.6;
+    pointer-events: none;
 }
 
 .send_icon {

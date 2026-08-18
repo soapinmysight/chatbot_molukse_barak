@@ -66,7 +66,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // function to replace the loading dots with normal text.
     // it gets 2 parameters, the loadingbox and the text with content
-    function replaceLoadingBubble(loadingBox, text) {
+    function replaceLoadingBubble(loadingBox, text, tokens) {
         // find the message bubble with in the outerbox
         const message = loadingBox.querySelector(".botmessage");
 
@@ -81,6 +81,17 @@ document.addEventListener("DOMContentLoaded", function () {
         // remove the loading dots and add the response
         message.replaceChildren(paragraph);
 
+        // only add tokens if they are recieved (if they are a number)
+        if (typeof tokens === "number") {
+            // create small html element to put the token information in
+            const tokenText = document.createElement("small");
+            tokenText.className = "token_usage"; //give it a css class
+            // add the number of tokens (value of parameter tokens) to the html element
+            tokenText.textContent = `Tokens gebruikt: ${tokens}`;
+
+            // put the token text inside the message
+            message.appendChild(tokenText);
+        }
         scrollToBottom();
     }
 
@@ -101,10 +112,14 @@ document.addEventListener("DOMContentLoaded", function () {
         // change the request running boolean to true
         requestRunning = true;
 
+        // add loading class to the button so it looks and acts inactive (for criteria: submit button inactief tijdens verwerken prompt.)
+        sendBtn.classList.add("loading");
+        sendBtn.setAttribute("aria-disabled", "true"); // so that screenreaders can know the button is disables as well
+
         // show the loading bubble response from the AI role while waiting for the API
         const loadingBox = appendLoadingBubble();
 
-        // try to send the message to the server!
+        // try to send the message to the server! yippie
         try {
             // data flow: app.js --> server.js
             const apiResponse = await fetch("/api/chat", {
@@ -115,8 +130,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 body: JSON.stringify({ message: text }),
             });
 
-            // data flow: server.js --> app.js
-            // convert the returned json into js object
+            // await response from the ai! and put it into a const (data flow: server.js --> app.js)
             const data = await apiResponse.json();
 
             // check if server returned error
@@ -125,7 +139,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             // replace the loading bubble with the AI response
-            replaceLoadingBubble(loadingBox, data.response);
+            replaceLoadingBubble(loadingBox, data.message, data.tokens);
         } catch (error) {
             console.error(error);
 
@@ -135,7 +149,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 "Er ging iets mis. Probeer het opnieuw.",
             );
         } finally { //this code runs after succes or failure
-            requestRunning = false;
+            requestRunning = false; //put boolean back so that new requests can be made
+            sendBtn.classList.remove("loading"); //remove the loading class from button so it looks active
+            sendBtn.removeAttribute("aria-disabled"); //remove inactive label for screen readers
             messageInput.focus();
         }
     }

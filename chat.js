@@ -67,6 +67,12 @@ export async function callAssistant(message) {
     new HumanMessage(message),
   ]);
 
+  // get tokens used by this api call and put in const
+  const tokens = response.usage_metadata.total_tokens;
+  console.log(`Tokens used: ${tokens}`);
+
   // return the answer to function callAssistant in server.js
-  return contentToText(response.content);
-}
+  return {
+    message: contentToText(response.content),
+    tokens: tokens,
+  };}
