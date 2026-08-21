@@ -1,9 +1,12 @@
 // import OpenAi chat model from langchain (this class sends the users messages to the OpenAI api)
 import { ChatOpenAI } from "@langchain/openai";
+
 //import HumanMessage class an SystemMessage class from Langchain
-// SystemMessage gives the OpenAi chatbot instructions
-// HumanMessage contains the users message
-import { HumanMessage, SystemMessage } from "@langchain/core/messages";
+import {
+  AIMessage, // AIMessage contains the answer from the AI
+  HumanMessage, // HumanMessage contains the users message
+  SystemMessage // SystemMessage gives the OpenAi chatbot instructions
+} from "@langchain/core/messages";
 
 // check if the key does not exist in the env file(process.env reads the value OPENAI_API_KEY from the .env file)
 if (!process.env.OPENAI_API_KEY) {
@@ -20,6 +23,26 @@ const llm = new ChatOpenAI({
   // use the model specified in env
   model: process.env.OPENAI_MODEL,
 });
+
+// Store a separate chat history for every user.
+const userChats = new Map();
+
+// Every chat starts with this system message.
+const systemPrompt = new SystemMessage(
+  "Je bent een jong meisje leeft in een Molukse Barak in Nederland. Antwoord over vragen over je leven. Blijf binnen de context en het referentiekader van het karakter.",
+);
+
+// Get or create the history for one user.
+function getUserChat(userId) {
+  // Check if this user does not have a history yet.
+  if (!userChats.has(userId)) {
+    // Create a new history containing the system message.
+    userChats.set(userId, [systemPrompt]);
+  }
+
+  // Return this user's history.
+  return userChats.get(userId);
+}
 
 //check to see if the respones holds text, if so return it
 function contentToText(content) {
@@ -56,23 +79,63 @@ function contentToText(content) {
 
 // this function is exported, so that server.js can import it
 // message parameter is used so that server can send the message to the api
-export async function callAssistant(message) {
-  const response = await llm.invoke([
-    // the SystemMessage gives the AI instructions on how to behave. the instructions are which to the api)
-    new SystemMessage(
-      "Je bent een jong meisje leeft in een Molukse Barak in Nederland. Antwoord over vragen over je leven. Blijf binnen de context en het referentiekader van het karakter.",
-    ),
+export async function callAssistant(userId, message) {
+  // use saved history when a userId was provided
+  // otherwise create a temporary chat without history
+  const messages = userId
+    ? getUserChat(userId)
+    : [systemPrompt];
 
-    // this is the users message which is sent to the api)
-    new HumanMessage(message),
-  ]);
+  // add the new question before calling OpenAI
+  // the model can now read the new question and previous history
+  messages.push(new HumanMessage(message));
 
-  // get tokens used by this api call and put in const
-  const tokens = response.usage_metadata.total_tokens;
+  // send the complete conversation to OpenAI
+  const response = await llm.invoke(messages);
+
+  // save the AI response only when history is enabled
+  if (userId) {
+    messages.push(response);
+  }
+
+  // get the tokens used by this API call
+  const tokens = response.usage_metadata?.total_tokens ?? 0;
+
   console.log(`Tokens used: ${tokens}`);
 
-  // return the answer to function callAssistant in server.js
+  // send the answer and token usage back to server.js
   return {
     message: contentToText(response.content),
     tokens: tokens,
-  };}
+  };
+}
+
+// return the last 10 messages for one user
+export function getUserHistory(userId) {
+  // use an empty array when this user has no history
+  const messages = userChats.get(userId) ?? [];
+
+  return messages
+    // do not send the hidden system message to the browser
+    .filter(
+      (message) =>
+        message instanceof HumanMessage ||
+        message instanceof AIMessage,
+    )
+    // only return the last 10 messages
+    .slice(-10)
+    // convert LangChain messages into simple JSON objects
+    .map((message) => {
+      const isUserMessage = message instanceof HumanMessage;
+
+      return {
+        role: isUserMessage ? "user" : "assistant",
+        message: contentToText(message.content),
+
+        // only AI messages contain token information
+        tokens: isUserMessage
+          ? undefined
+          : message.usage_metadata?.total_tokens ?? 0,
+      };
+    });
+}

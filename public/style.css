@@ -281,6 +281,34 @@ line-height: normal;
     flex-shrink: 0;
 }
 
+.skip_username_btn {
+    display: flex;
+    width: 100%;
+    padding: 7px 10px;
+    justify-content: center;
+    align-items: center;
+    border: none;
+    border-radius: 12px;
+    background: #E0CCCC;
+    color: #01273D;
+    font-family: "Inclusive Sans", system-ui, sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.3;
+    text-align: center;
+    white-space: normal;
+    cursor: pointer;
+}
+
+.skip_username_btn:hover {
+    background: #D4B5B5;
+}
+
+.skip_username_btn:focus-visible {
+    outline: 2px solid #125E8A;
+    outline-offset: 2px;
+}
+
 .section2 {
     display: flex;
     width: 75vw;

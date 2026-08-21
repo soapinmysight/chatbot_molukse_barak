@@ -10,6 +10,22 @@ document.addEventListener("DOMContentLoaded", function () {
     // find chatlog field and put it in a const
     const chatlog = document.querySelector(".chatlog");
 
+    // find the username introduction
+    const usernameIntroBox = document.querySelector(".username_intro_box");
+    // find the skip button
+    const skipUsernameBtn = document.querySelector(".skip_username_btn");
+
+
+    // get saved user information from localStorage
+    let userId = localStorage.getItem("userid");
+    let username = localStorage.getItem("username");
+
+    // a returning user has already chosen a username
+    let usernameChoiceMade = Boolean(userId && username);
+
+    // only save history when a username was chosen
+    let historyEnabled = usernameChoiceMade;
+
     // variable to know if an api request is running or not
     let requestRunning = false;
 
@@ -76,18 +92,14 @@ document.addEventListener("DOMContentLoaded", function () {
         message.classList.remove("loading-bubble");
         message.removeAttribute("aria-label"); // remove the aria-label for screen readers as well
 
-        // // create a paragraph to add the text inside
-        // const paragraph = document.createElement("p");
-        // paragraph.textContent = text; // add the value of the text parameter to the paragraph
-
         // add the value of the text parameter to cost that is converted to have markdown with micromark
         const markdownHtml = micromark(text);
 
-        // // remove the loading dots and add the response
-        //message.replaceChildren(paragraph);
-
         // remove the loading dots and add the response (formatted to have markdwon)
         message.innerHTML = markdownHtml;
+
+        console.log(history);
+
 
         // only add tokens if they are recieved (if they are a number)
         if (typeof tokens === "number") {
@@ -103,6 +115,74 @@ document.addEventListener("DOMContentLoaded", function () {
         scrollToBottom();
     }
 
+    // add a saved AI message to the chatlog
+    function appendBotMessage(text, tokens) {
+        // create the outer bot-message box
+        const box = document.createElement("div");
+        box.className = "botmessage_box";
+
+        // create the inner bot-message bubble
+        const message = document.createElement("div");
+        message.className = "botmessage";
+
+        // put the message bubble inside the chatlog
+        box.appendChild(message);
+        chatlog.appendChild(box);
+
+        // reuse the existing function for Markdown and tokens
+        replaceLoadingBubble(box, text, tokens);
+    }
+
+    // load the last 10 messages for a returning user
+    async function loadHistory() {
+        try {
+            // data flow: app.js --> server.js
+            const response = await fetch("/api/gethistory", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ userId: userId }),
+            });
+
+            // data flow: server.js --> app.js
+            const history = await response.json();
+
+            // stop when the server returned an error
+            if (!response.ok) {
+                throw new Error("History could not be loaded.");
+            }
+
+            // add every saved message to the chatlog
+            history.forEach(function (item) {
+                if (item.role === "user") {
+                    appendUserMessage(item.message);
+                } else {
+                    appendBotMessage(item.message, item.tokens);
+                }
+            });
+        } catch (error) {
+            console.error("Chat history could not be loaded:", error);
+        }
+    }
+
+    // continue without a username or chat history
+    function skipUsername() {
+        // remember that the user made a choice
+        usernameChoiceMade = true;
+
+        // do not save history for this user
+        historyEnabled = false;
+
+        // remove the skip button from the introduction
+        skipUsernameBtn?.remove();
+
+        // the input can now be used for normal questions
+        messageInput.placeholder = "Typ hier je bericht";
+        messageInput.focus();
+    }
+
+
     // send users message to the server
     async function sendMessage() {
         // remove extra spaces from input and put it in a const
@@ -110,6 +190,33 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // stop if the input is emty or a request is already running
         if (!text || requestRunning) {
+            return;
+        }
+
+        // the first entered value becomes the username
+        if (!usernameChoiceMade) {
+            username = text;
+
+            // create a unique ID for this user
+            userId = crypto.randomUUID();
+
+            // save only the username and ID in localStorage
+            localStorage.setItem("username", username);
+            localStorage.setItem("userid", userId);
+
+            // enable chat history for this user
+            usernameChoiceMade = true;
+            historyEnabled = true;
+
+            // remove the skip button after choosing a username
+            skipUsernameBtn?.remove();
+
+            // empty and update the input field
+            messageInput.value = "";
+            messageInput.placeholder = "Typ hier je bericht";
+            messageInput.focus();
+
+            // do not send the username to OpenAI
             return;
         }
 
@@ -135,7 +242,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ message: text }),
+                body: JSON.stringify({
+                    // send an ID only when chat history is enabled
+                    userId: historyEnabled ? userId : null,
+                    message: text,
+                }),
             });
 
             // await response from the ai! and put it into a const (data flow: server.js --> app.js)
@@ -158,9 +269,11 @@ document.addEventListener("DOMContentLoaded", function () {
             );
         } finally { //this code runs after succes or failure
             requestRunning = false; //put boolean back so that new requests can be made
+
             sendBtn.classList.remove("loading"); //remove the loading class from button so it looks active
             sendBtn.removeAttribute("aria-disabled"); //remove inactive label for screen readers
-            messageInput.focus();
+
+            messageInput.focus(); // put the cursor back inside the input field
         }
     }
 
@@ -172,4 +285,19 @@ document.addEventListener("DOMContentLoaded", function () {
             sendMessage();
         }
     });
+
+    // continue anonymously when the skip button is clicked
+    skipUsernameBtn?.addEventListener("click", skipUsername);
+
+    // load the history when this is a returning user
+    if (historyEnabled) {
+        // the user already has a username, so remove the introduction
+        usernameIntroBox?.remove();
+
+        // change the input back to a normal chat input
+        messageInput.placeholder = "Typ hier je bericht";
+
+        // ask the server for the last 10 messages
+        loadHistory();
+    }
 });
