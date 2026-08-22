@@ -15,7 +15,7 @@ The user can send messages through a chat interface. AI answers are shown with M
 3. Open a terminal in the project folder.
 4. Install the packages:
 
-```bash
+```
 npm install
 ```
 
