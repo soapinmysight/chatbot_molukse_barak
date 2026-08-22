@@ -20,7 +20,8 @@ npm install
 ```
 
 5. Creat an env file `.env`.
-6. Add your OpenAI API key and model to `.env`:
+6. Purchase an OpenAI API key at https://platform.openai.com
+7. Add your OpenAI API key and model to `.env`:
 
 ```env
 OPENAI_API_KEY=your_api_key
