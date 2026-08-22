@@ -98,9 +98,6 @@ document.addEventListener("DOMContentLoaded", function () {
         // remove the loading dots and add the response (formatted to have markdwon)
         message.innerHTML = markdownHtml;
 
-        console.log(history);
-
-
         // only add tokens if they are recieved (if they are a number)
         if (typeof tokens === "number") {
             // create small html element to put the token information in
@@ -200,13 +197,16 @@ document.addEventListener("DOMContentLoaded", function () {
             // create a unique ID for this user
             userId = crypto.randomUUID();
 
-            // save only the username and ID in localStorage
+            // save the username and ID in localStorage
             localStorage.setItem("username", username);
             localStorage.setItem("userid", userId);
 
             // enable chat history for this user
             usernameChoiceMade = true;
             historyEnabled = true;
+
+            // show the username as a user message in the chatlog
+            appendUserMessage(username);
 
             // remove the skip button after choosing a username
             skipUsernameBtn?.remove();
@@ -216,7 +216,56 @@ document.addEventListener("DOMContentLoaded", function () {
             messageInput.placeholder = "Typ hier je bericht";
             messageInput.focus();
 
-            // do not send the username to OpenAI
+            // prevent another request while starting the chat.
+            requestRunning = true;
+            sendBtn.classList.add("loading");
+            sendBtn.setAttribute("aria-disabled", "true");
+
+            // show a loading bubble for the automatic response.
+            const loadingBox = appendLoadingBubble();
+
+            try {
+                // send the username and user ID to server.js
+                const response = await fetch("/api/startchat", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        userId: userId,
+                        username: username,
+                    }),
+                });
+
+                // read the automatic response from server.js
+                const data = await response.json();
+
+                // check if the server returned an error (if response not ok...)
+                if (!response.ok) {
+                    throw new Error(data.error);
+                }
+
+                // replace the loading bubble with the automatic response.
+                replaceLoadingBubble(
+                    loadingBox,
+                    data.message,
+                );
+            } catch (error) {
+                console.error(error);
+
+                // replace the loading bubble with an error message.
+                replaceLoadingBubble(
+                    loadingBox,
+                    "Er ging iets mis. Probeer het opnieuw.",
+                );
+            } finally {
+                // allow new requests again.
+                requestRunning = false;
+                sendBtn.classList.remove("loading");
+                sendBtn.removeAttribute("aria-disabled");
+                messageInput.focus();
+            }
+
             return;
         }
 
