@@ -33,7 +33,7 @@ For model, I used gpt-5-nano as it's cheap but any model can be used.
 7. Start the server:
 
 ```
-npm run dev
+npm start
 ```
 
 8. Open this address in your browser:
