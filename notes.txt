@@ -1,0 +1,19 @@
+Voornaamste bronnen system message
+https://erfgoedgelderland.nl/gelderseroos/molukse-barak-kamp-lage-mierde/
+https://www.openluchtmuseum.nl/nl/locaties/moluksebarak
+https://www.openluchtmuseum.nl/nl/pers/vernieuwde-molukse-barak
+https://www.arnhem-direct.nl/molukse-barak-openluchtmuseum-gerestaureerd-en-heringericht/
+https://www.nationaalarchief.nl/beleven/nieuws/1951-eerste-molukkers-komen-aan-in-nederland
+https://www.rtvdrenthe.nl/nieuws/15426220/65-jaar-na-de-verwoestende-brand-in-schattenberg-opeens-werd-het-aardedonker
+
+Langchain openai setup guide
+https://www.npmjs.com/package/@langchain/openai
+
+Front-end design
+https://www.figma.com/design/5FAkBTzUj7vkZAcY7sGThs/Untitled?node-id=1-2&t=dKZPrVYopMbycrBv-0
+
+Chathistory bronnen
+https://docs.langchain.com/oss/javascript/langchain/messages
+https://docs.langchain.com/oss/javascript/langchain/models#invoke
+https://docs.langchain.com/oss/javascript/langchain/short-term-memory
+https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map
