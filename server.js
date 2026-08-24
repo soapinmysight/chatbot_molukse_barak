@@ -38,6 +38,7 @@ app.post("/api/chat", async (req, res) => {
 
   try {
     //await until function callAssistant from chat.js returns OpenAi's response
+    // (the chat route passes the message to callAssistant())
     const response = await callAssistant(userId, message.trim());
     return res.json(response); //return answer in json
 

@@ -22,6 +22,11 @@ const llm = new ChatOpenAI({
   apiKey: process.env.OPENAI_API_KEY,
   // use the model specified in env
   model: process.env.OPENAI_MODEL,
+    // temperature: 0.5, // this controls randomness or creativity. 
+    // since it's an historic information based application, we're low on randomness
+    // using gpt-5-nano right now so i commented this out (since it does not support changing temperature)
+  verbose: false, // this enables or disables extra LangChain logging
+  maxTokens: 5000, // this limits the maximum number of tokens in the generated answer
 });
 
 // Store a separate chat history for every user.
@@ -140,7 +145,8 @@ export async function callAssistant(userId, message) {
   // the model can now read the new question and previous history
   messages.push(new HumanMessage(message));
 
-  // send the complete conversation to OpenAI
+  // finally send the complete conversation to OpenAI 
+  // await makes Node wait untill OpenAI gives a respones
   const response = await llm.invoke(messages);
 
   // save the AI response only when history is enabled
